@@ -65,12 +65,18 @@ function renderLearn() {
   };
 }
 
-// 単語一覧（削除ボタン付き）
+// 単語一覧（削除ボタン・リセットボタン付き）
 function renderList() {
   if (words.length === 0) return view.innerHTML = "<p>単語がありません</p>";
-  view.innerHTML = "<ul>" +
-    words.map((w,i) => `<li>${w.en} - ${w.ja} <button data-index="${i}" class="delete">削除</button></li>`).join("") +
-    "</ul>";
+
+  view.innerHTML = `
+    <button id="reset">リストをリセット</button>
+    <ul>
+      ${words.map((w,i) => `<li>${w.en} - ${w.ja} <button data-index="${i}" class="delete">削除</button></li>`).join("")}
+    </ul>
+  `;
+
+  // 削除ボタン
   document.querySelectorAll(".delete").forEach(btn => {
     btn.onclick = () => {
       const index = parseInt(btn.dataset.index);
@@ -81,7 +87,18 @@ function renderList() {
       }
     };
   });
+
+  // リセットボタン
+  $("#reset").onclick = () => {
+    if (confirm("単語リストを全部削除して初期化しますか？")) {
+      words = [];
+      save();
+      alert("リストをリセットしました");
+      renderList();
+    }
+  };
 }
+
 
 // 単語追加モード（手動と自動10問追加）
 function renderAdd() {
