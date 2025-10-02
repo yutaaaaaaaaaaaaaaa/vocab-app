@@ -11,12 +11,16 @@ if (words.length === 0) {
 } else {
   renderLearn();
 }
-function save() { localStorage.setItem(KEY, JSON.stringify(words)); }
+
+function save() { 
+  localStorage.setItem(KEY, JSON.stringify(words)); 
+}
 
 $("#modeLearn").onclick = renderLearn;
 $("#modeList").onclick = renderList;
 $("#modeAdd").onclick = renderAdd;
 
+// 学習モード
 function renderLearn() {
   if (words.length === 0) return view.innerHTML = "<p>単語がありません</p>";
   const q = words[Math.floor(Math.random() * words.length)];
@@ -33,12 +37,28 @@ function renderLearn() {
   };
 }
 
+// 単語一覧モード（削除ボタン付き）
 function renderList() {
+  if (words.length === 0) return view.innerHTML = "<p>単語がありません</p>";
+  
   view.innerHTML = "<ul>" +
-    words.map(w => `<li>${w.en} - ${w.ja}</li>`).join("") +
+    words.map((w,i) => `<li>${w.en} - ${w.ja} <button data-index="${i}" class="delete">削除</button></li>`).join("") +
     "</ul>";
+
+  // 削除ボタンにイベントを追加
+  document.querySelectorAll(".delete").forEach(btn => {
+    btn.onclick = () => {
+      const index = parseInt(btn.dataset.index);
+      if (confirm(`"${words[index].en}" を削除しますか？`)) {
+        words.splice(index, 1);
+        save();
+        renderList();
+      }
+    };
+  });
 }
 
+// 単語追加モード
 function renderAdd() {
   view.innerHTML = `
     <input id="en" placeholder="英語" />
@@ -46,7 +66,12 @@ function renderAdd() {
     <button id="add">追加</button>
   `;
   $("#add").onclick = () => {
-    words.push({ en: $("#en").value, ja: $("#ja").value });
-    save(); alert("追加しました"); renderList();
+    const en = $("#en").value.trim();
+    const ja = $("#ja").value.trim();
+    if (!en || !ja) return alert("両方入力してください");
+    words.push({ en, ja });
+    save(); 
+    alert("追加しました"); 
+    renderList();
   };
 }
